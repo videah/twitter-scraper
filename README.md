@@ -7,7 +7,7 @@ use twitter_scraper::{run, TwitterResults};
 
 fn main() {
     let query: String = "#Trump".to_string();
-    let results: TwitterResults = run(query, None, None, None).unwrap();
+    let results: TwitterResults = run(query, None, None, None, false).unwrap();
     println!("{:?}", results);
 }
 ```

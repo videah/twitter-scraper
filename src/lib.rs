@@ -13,7 +13,7 @@ use serde_json::Value;
 
 #[derive(Debug)]
 pub struct TwitterResults {
-    pub cursor: String,
+    pub cursor: Option<String>,
     pub guest_token: String,
     pub tweets: Option<Vec<Tweet>>,
     pub users: Option<Vec<User>>,
@@ -25,8 +25,9 @@ pub async fn run(
     auth_token_option: Option<&'static str>,
     guest_token_option: Option<&'static str>,
     cursor: Option<String>,
+    ignore_cursor: bool,
 ) -> Result<TwitterResults, Box<dyn std::error::Error>> {
-    run_async(query, auth_token_option, guest_token_option, cursor).await
+    run_async(query, auth_token_option, guest_token_option, cursor, ignore_cursor).await
 }
 
 pub async fn run_async(
@@ -34,6 +35,7 @@ pub async fn run_async(
     auth_token_option: Option<&'static str>,
     guest_token_option: Option<&'static str>,
     cursor: Option<String>,
+    ignore_cursor: bool,
 ) -> Result<TwitterResults, Box<dyn std::error::Error>> {
     let headers_tuples: [(&'static str, &'static str); 2] =
         get_headers(auth_token_option, guest_token_option).await?;
@@ -48,7 +50,10 @@ pub async fn run_async(
         .await?
         .error_for_status()?;
     let body_data: Value = response.json::<Value>().await?;
-    let next_cursor: String = get_next_cursor(&body_data, cursor)?;
+    let next_cursor: Option<String> = match ignore_cursor {
+        true => None,
+        false => Some(get_next_cursor(&body_data, cursor)?)
+    };
     let tweets: Vec<Tweet> = get_tweets(&body_data);
     let users: Vec<User> = get_users(&body_data);
     let guest_token: String = headers_tuples[1].1.to_string();
