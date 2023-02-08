@@ -26,6 +26,15 @@ pub async fn run(
     guest_token_option: Option<&'static str>,
     cursor: Option<String>,
 ) -> Result<TwitterResults, Box<dyn std::error::Error>> {
+    run_async(query, auth_token_option, guest_token_option, cursor).await
+}
+
+pub async fn run_async(
+    query: String,
+    auth_token_option: Option<&'static str>,
+    guest_token_option: Option<&'static str>,
+    cursor: Option<String>,
+) -> Result<TwitterResults, Box<dyn std::error::Error>> {
     let headers_tuples: [(&'static str, &'static str); 2] =
         get_headers(auth_token_option, guest_token_option).await?;
     let request_config: RequestConfig =
